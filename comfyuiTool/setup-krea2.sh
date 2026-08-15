@@ -8,6 +8,7 @@ RUNTIME_DIR="${PROJECT_DIR}/.runtime"
 DEPENDENCY_MARKER="${RUNTIME_DIR}/dependencies.ready"
 export KREA_MODEL_REPO="${KREA_MODEL_REPO:-Comfy-Org/Krea-2}"
 export KREA_MODEL_DIR="${MODEL_DIR}"
+export HF_XET_HIGH_PERFORMANCE="${HF_XET_HIGH_PERFORMANCE:-1}"
 LOG_DIR="${PROJECT_DIR}/logs"
 
 [[ -f "${COMFYUI_DIR}/main.py" ]] || { echo "ComfyUI/main.py is missing from the repository."; exit 1; }
@@ -16,6 +17,7 @@ mkdir -p "${RUNTIME_DIR}" "${LOG_DIR}" "${MODEL_DIR}/diffusion_models" "${MODEL_
 exec > >(tee -a "${LOG_DIR}/setup-krea2.log") 2>&1
 
 echo "Preparing the CloudStudio A10 workspace at ${PROJECT_DIR}."
+echo "Hugging Face Xet high-performance mode: ${HF_XET_HIGH_PERFORMANCE}."
 
 if [[ ! -f "${DEPENDENCY_MARKER}" ]]; then
   echo "[1/2] Preparing ComfyUI dependencies (one time only)..."
