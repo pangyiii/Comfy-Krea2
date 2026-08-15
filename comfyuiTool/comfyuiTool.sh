@@ -12,6 +12,7 @@ fi
 
 export COMFYUI_DIR="${TEMPLATE_COMFYUI_DIR}"
 export DATA_DIR="${PROJECT_DIR}/.data"
+export MODEL_PATHS_TEMPLATE="${PROJECT_DIR}/extra_model_paths.yaml"
 export PORT="${PORT:-8188}"
 
 if ! command -v hf >/dev/null 2>&1; then
