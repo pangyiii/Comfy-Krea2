@@ -7,10 +7,13 @@ models/
 output/
 input/
 custom_nodes/
+.runtime/
+.data/
 
 # Local tooling
 __pycache__/
 *.py[cod]
 .venv/
-.vscode/
+.vscode/*
+!.vscode/preview.yml
 .idea/
