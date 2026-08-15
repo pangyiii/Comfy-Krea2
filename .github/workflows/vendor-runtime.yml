@@ -32,7 +32,7 @@ jobs:
           krea_sha="$(git -C "$work_dir/krea-2" rev-parse HEAD)"
           manager_sha="$(git -C "$work_dir/ComfyUI-Manager" rev-parse HEAD)"
 
-          mkdir -p ComfyUI krea-2 ComfyUI/custom_nodes/comfyui-manager
+          mkdir -p ComfyUI krea-2
           rsync -a --delete --exclude=.git/ "$work_dir/ComfyUI/" ComfyUI/
           rsync -a --delete --exclude=.git/ "$work_dir/krea-2/" krea-2/
           mkdir -p ComfyUI/custom_nodes/comfyui-manager
@@ -41,9 +41,9 @@ jobs:
           {
             echo "# Vendored upstream revisions"
             echo
-            echo "- ComfyUI: `$comfy_sha`"
-            echo "- Krea 2: `$krea_sha`"
-            echo "- ComfyUI-Manager: `$manager_sha`"
+            echo "- ComfyUI: $comfy_sha"
+            echo "- Krea 2: $krea_sha"
+            echo "- ComfyUI-Manager: $manager_sha"
           } > UPSTREAM_VERSIONS.md
 
       - name: Commit imported sources
@@ -53,6 +53,7 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add ComfyUI krea-2 UPSTREAM_VERSIONS.md
+          git add -f ComfyUI/custom_nodes/comfyui-manager
           if git diff --cached --quiet; then
             echo "Vendored sources are already current."
             exit 0
