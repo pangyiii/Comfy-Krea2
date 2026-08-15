@@ -44,6 +44,7 @@ if [[ "${missing}" == "1" ]]; then
     --local-dir "${MODEL_DIR}"
 fi
 
+cd "${COMFYUI_DIR}"
 exec python3 main.py \
   --listen 0.0.0.0 \
   --port "${PORT}" \
