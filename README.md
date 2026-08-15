@@ -6,7 +6,7 @@
 - Krea 2 官方源码
 - ComfyUI-Manager
 - CloudStudio Preview 配置
-- Krea 2 Turbo FP8 自动初始化与启动脚本
+- Krea 2 Turbo FP8 一次性准备与启动脚本
 
 ## CloudStudio 规格
 
@@ -19,21 +19,32 @@
 
 本项目不使用 T4，也没有添加 `--lowvram`。
 
-## 启动
+## 一次性准备与启动
 
-从本仓库创建应用后，点击“运行”。CloudStudio 会读取 `.vscode/preview.yml` 并执行：
+从本仓库创建 A10 应用后，先在 CloudStudio 终端执行一次：
+
+```bash
+bash /workspace/comfyuiTool/setup-krea2.sh
+```
+
+这个阶段只在依赖或模型文件缺失时安装/下载；日志写入
+`/workspace/logs/setup-krea2.log`。成功后再点击“运行”。CloudStudio 会读取
+`.vscode/preview.yml` 并执行：
 
 ```bash
 bash comfyuiTool/comfyuiTool.sh
 ```
 
-首次启动会：
+日常 Preview 只会校验准备标记与模型文件，然后立即启动真正的 ComfyUI：
 
-1. 安装/校验 ComfyUI 依赖；
-2. 下载 Krea 2 Turbo FP8、Qwen3-VL 文本编码器和 VAE；
-3. 启动 ComfyUI。
+```bash
+python3 main.py --listen 0.0.0.0 --port 8188
+```
 
-之后启动会复用现有依赖和模型，不重复下载。
+它不会安装依赖、下载模型，或用占位 HTTP 页面占用 8188。若准备不完整或 CUDA
+不可用，Preview 会立刻退出并在日志中输出下一步命令，避免在 ComfyUI 未运行时持续消耗 A10。
+
+之后准备和启动都会复用现有依赖、模型和 Hugging Face 缓存，不重复下载。
 
 ## 模型位置
 

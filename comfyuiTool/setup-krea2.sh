@@ -6,14 +6,18 @@ COMFYUI_DIR="${PROJECT_DIR}/ComfyUI"
 MODEL_DIR="${COMFYUI_DIR}/models"
 RUNTIME_DIR="${PROJECT_DIR}/.runtime"
 DEPENDENCY_MARKER="${RUNTIME_DIR}/dependencies.ready"
-MODEL_REPO="${KREA_MODEL_REPO:-Comfy-Org/Krea-2}"
+export KREA_MODEL_REPO="${KREA_MODEL_REPO:-Comfy-Org/Krea-2}"
+export KREA_MODEL_DIR="${KREA_MODEL_DIR:-${MODEL_DIR}}"
+LOG_DIR="${PROJECT_DIR}/logs"
 
 [[ -f "${COMFYUI_DIR}/main.py" ]] || { echo "ComfyUI/main.py is missing from the repository."; exit 1; }
-mkdir -p "${RUNTIME_DIR}" "${MODEL_DIR}/diffusion_models" "${MODEL_DIR}/text_encoders" "${MODEL_DIR}/vae" "${MODEL_DIR}/loras" "${COMFYUI_DIR}/output"
+mkdir -p "${RUNTIME_DIR}" "${LOG_DIR}" "${MODEL_DIR}/diffusion_models" "${MODEL_DIR}/text_encoders" "${MODEL_DIR}/vae" "${MODEL_DIR}/loras" "${COMFYUI_DIR}/output"
+exec > >(tee -a "${LOG_DIR}/setup-krea2.log") 2>&1
+
+echo "Preparing the CloudStudio A10 workspace at ${PROJECT_DIR}."
 
 if [[ ! -f "${DEPENDENCY_MARKER}" ]]; then
   echo "[1/2] Preparing ComfyUI dependencies (one time only)..."
-  python3 -m pip install --upgrade pip
   python3 -m pip install -r "${COMFYUI_DIR}/requirements.txt"
   if [[ -f "${COMFYUI_DIR}/custom_nodes/comfyui-manager/requirements.txt" ]]; then
     python3 -m pip install -r "${COMFYUI_DIR}/custom_nodes/comfyui-manager/requirements.txt"
