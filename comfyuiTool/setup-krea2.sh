@@ -7,7 +7,7 @@ MODEL_DIR="${COMFYUI_DIR}/models"
 RUNTIME_DIR="${PROJECT_DIR}/.runtime"
 DEPENDENCY_MARKER="${RUNTIME_DIR}/dependencies.ready"
 export KREA_MODEL_REPO="${KREA_MODEL_REPO:-Comfy-Org/Krea-2}"
-export KREA_MODEL_DIR="${KREA_MODEL_DIR:-${MODEL_DIR}}"
+export KREA_MODEL_DIR="${MODEL_DIR}"
 LOG_DIR="${PROJECT_DIR}/logs"
 
 [[ -f "${COMFYUI_DIR}/main.py" ]] || { echo "ComfyUI/main.py is missing from the repository."; exit 1; }
@@ -52,6 +52,9 @@ for filename in files:
         local_dir=str(root),
         token=os.environ.get("HF_TOKEN") or None,
     )
+    if not target.is_file() or target.stat().st_size == 0:
+        raise RuntimeError(f"Download did not produce a usable file: {target}")
+    print(f"Ready: {target} ({target.stat().st_size / 1024**3:.2f} GiB)")
 PY
 
 echo "Krea 2 Turbo FP8 is ready."

@@ -15,9 +15,9 @@ required_files=(
   "${MODEL_DIR}/vae/qwen_image_vae.safetensors"
 )
 
-missing=0
+missing_files=()
 for file in "${required_files[@]}"; do
-  [[ -f "${file}" ]] || missing=1
+  [[ -s "${file}" ]] || missing_files+=("${file}")
 done
 
 fail() {
@@ -32,7 +32,11 @@ fail() {
 # and keeps an A10 allocated while ComfyUI is not running.
 [[ -f "${COMFYUI_DIR}/main.py" ]] || fail "missing ${COMFYUI_DIR}/main.py"
 [[ -f "${RUNTIME_DIR}/dependencies.ready" ]] || fail "dependencies are not prepared"
-[[ "${missing}" == "0" ]] || fail "one or more Krea 2 Turbo FP8 model files are missing"
+if (( ${#missing_files[@]} > 0 )); then
+  printf 'Missing Krea 2 model files:\n' >&2
+  printf '  %s\n' "${missing_files[@]}" >&2
+  fail "run the one-time setup and wait for it to finish successfully"
+fi
 
 python3 -c 'import torch; assert torch.cuda.is_available(), "CUDA is unavailable"' \
   || fail "PyTorch cannot access CUDA; this application requires a GPU A10"
