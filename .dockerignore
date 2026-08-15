@@ -1,0 +1,8 @@
+.git
+.env
+data
+models
+output
+input
+custom_nodes
+README.md
