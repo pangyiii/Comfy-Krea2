@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>ComfyUI Krea 2 初始化</title>
+  <style>
+    :root { color-scheme: dark; font-family: system-ui, sans-serif; }
+    body { margin: 0; min-height: 100vh; display: grid; place-items: center; background: #11131a; }
+    main { width: min(680px, calc(100% - 48px)); padding: 32px; border: 1px solid #303544; border-radius: 18px; background: #1a1e29; }
+    h1 { margin-top: 0; font-size: 24px; }
+    p { color: #c7ccda; line-height: 1.7; }
+    #status { padding: 16px; border-radius: 10px; background: #10131a; white-space: pre-wrap; }
+    .spinner { width: 26px; height: 26px; border: 3px solid #3c4355; border-top-color: #70a5ff; border-radius: 50%; animation: spin 1s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+  </style>
+</head>
+<body>
+  <main>
+    <div class="spinner"></div>
+    <h1>正在准备 ComfyUI + Krea 2 Turbo FP8</h1>
+    <p>8188 端口已经正常监听，CloudStudio 不会再因模型下载时间过长而反复重启。</p>
+    <div id="status">读取状态中……</div>
+    <p>首次运行需要下载较大的模型文件。完成后页面会自动切换到 ComfyUI。</p>
+  </main>
+  <script>
+    async function refreshStatus() {
+      try {
+        const response = await fetch('status.txt?ts=' + Date.now(), { cache: 'no-store' });
+        const text = await response.text();
+        document.getElementById('status').textContent = text;
+        if (text.startsWith('READY')) setTimeout(() => location.reload(), 2500);
+      } catch (_) {
+        setTimeout(() => location.reload(), 2500);
+      }
+    }
+    refreshStatus();
+    setInterval(refreshStatus, 3000);
+  </script>
+</body>
+</html>
