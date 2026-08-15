@@ -1,0 +1,8 @@
+apps:
+  - port: 8188
+    run: bash start-preview.sh
+    root: .
+    name: ComfyUI Krea 2
+    autoOpen: true
+    autoPreview: true
+    mainPort: true
