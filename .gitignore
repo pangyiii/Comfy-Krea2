@@ -1,0 +1,16 @@
+# Never commit credentials or generated model data
+.env
+.env.*
+!.env.example
+data/
+models/
+output/
+input/
+custom_nodes/
+
+# Local tooling
+__pycache__/
+*.py[cod]
+.venv/
+.vscode/
+.idea/
