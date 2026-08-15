@@ -2,7 +2,7 @@ apps:
   - port: 8188
     run: bash comfyuiTool/comfyuiTool.sh
     root: .
-    name: ComfyUI Krea 2
+    name: ComfyUI Krea 2 Turbo FP8
     autoOpen: true
     autoPreview: true
     mainPort: true
