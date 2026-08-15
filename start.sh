@@ -4,7 +4,7 @@ set -Eeuo pipefail
 COMFYUI_DIR="${COMFYUI_DIR:-/opt/ComfyUI}"
 DATA_DIR="${DATA_DIR:-/data}"
 MODEL_DIR="${DATA_DIR}/models"
-CUSTOM_NODES_DIR="${DATA_DIR}/custom_nodes"
+CUSTOM_NODES_DIR="${COMFYUI_DIR}/custom_nodes"
 MANAGER_DIR="${CUSTOM_NODES_DIR}/comfyui-manager"
 OUTPUT_DIR="${DATA_DIR}/output"
 PORT="${PORT:-8188}"
@@ -13,16 +13,13 @@ MODEL_REPO="${KREA_MODEL_REPO:-Comfy-Org/Krea-2}"
 mkdir -p "${MODEL_DIR}/diffusion_models" "${MODEL_DIR}/text_encoders" "${MODEL_DIR}/vae" "${MODEL_DIR}/loras" "${CUSTOM_NODES_DIR}" "${OUTPUT_DIR}" "${DATA_DIR}/user"
 
 if [[ ! -d "${MANAGER_DIR}/.git" ]]; then
-  echo "Installing ComfyUI-Manager into the persistent custom-nodes directory..."
+  echo "Installing ComfyUI-Manager into ComfyUI's existing custom-nodes directory..."
   git clone --depth 1 https://github.com/Comfy-Org/ComfyUI-Manager.git "${MANAGER_DIR}"
 fi
 
 if [[ -f "${MANAGER_DIR}/requirements.txt" ]]; then
   python3 -m pip install -r "${MANAGER_DIR}/requirements.txt"
 fi
-
-rm -rf "${COMFYUI_DIR}/custom_nodes"
-ln -s "${CUSTOM_NODES_DIR}" "${COMFYUI_DIR}/custom_nodes"
 
 required_files=(
   "diffusion_models/krea2_turbo_fp8_scaled.safetensors"
