@@ -2,34 +2,51 @@
 set -Eeuo pipefail
 
 PROJECT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-COMFYUI_DIR="/workspace/ComfyUI"
-DATA_DIR="${PROJECT_DIR}/.data"
-MODEL_DIR="${DATA_DIR}/models"
-MANAGER_DIR="${COMFYUI_DIR}/custom_nodes/comfyui-manager"
-MANAGER_MARKER="${DATA_DIR}/.manager-dependencies-installed"
+COMFYUI_DIR="${PROJECT_DIR}/ComfyUI"
+MODEL_DIR="${COMFYUI_DIR}/models"
+RUNTIME_DIR="${PROJECT_DIR}/.runtime"
+DEPENDENCY_MARKER="${RUNTIME_DIR}/dependencies.ready"
 MODEL_REPO="${KREA_MODEL_REPO:-Comfy-Org/Krea-2}"
 
-[[ -f "${COMFYUI_DIR}/main.py" ]] || { echo "Missing /workspace/ComfyUI template."; exit 1; }
-mkdir -p "${MODEL_DIR}/diffusion_models" "${MODEL_DIR}/text_encoders" "${MODEL_DIR}/vae" "${MODEL_DIR}/loras"
+[[ -f "${COMFYUI_DIR}/main.py" ]] || { echo "ComfyUI/main.py is missing from the repository."; exit 1; }
+mkdir -p "${RUNTIME_DIR}" "${MODEL_DIR}/diffusion_models" "${MODEL_DIR}/text_encoders" "${MODEL_DIR}/vae" "${MODEL_DIR}/loras" "${COMFYUI_DIR}/output"
 
-if ! command -v hf >/dev/null 2>&1; then
-  python3 -m pip install --user --upgrade "huggingface_hub[cli]"
-  export PATH="${HOME}/.local/bin:${PATH}"
+if [[ ! -f "${DEPENDENCY_MARKER}" ]]; then
+  echo "[1/2] Preparing ComfyUI dependencies (one time only)..."
+  python3 -m pip install --upgrade pip
+  python3 -m pip install -r "${COMFYUI_DIR}/requirements.txt"
+  if [[ -f "${COMFYUI_DIR}/custom_nodes/comfyui-manager/requirements.txt" ]]; then
+    python3 -m pip install -r "${COMFYUI_DIR}/custom_nodes/comfyui-manager/requirements.txt"
+  fi
+  python3 -m pip install --upgrade huggingface_hub
+  touch "${DEPENDENCY_MARKER}"
 fi
 
-if [[ ! -d "${MANAGER_DIR}/.git" ]]; then
-  git clone --depth 1 https://github.com/Comfy-Org/ComfyUI-Manager.git "${MANAGER_DIR}"
-fi
+echo "[2/2] Ensuring Krea 2 Turbo FP8 model assets are present..."
+python3 - <<'PY'
+import os
+from pathlib import Path
+from huggingface_hub import hf_hub_download
 
-if [[ ! -f "${MANAGER_MARKER}" && -f "${MANAGER_DIR}/requirements.txt" ]]; then
-  python3 -m pip install -r "${MANAGER_DIR}/requirements.txt"
-  touch "${MANAGER_MARKER}"
-fi
+repo_id = os.environ.get("KREA_MODEL_REPO", "Comfy-Org/Krea-2")
+root = Path(os.environ["KREA_MODEL_DIR"])
+files = (
+    "diffusion_models/krea2_turbo_fp8_scaled.safetensors",
+    "text_encoders/qwen3vl_4b_fp8_scaled.safetensors",
+    "vae/qwen_image_vae.safetensors",
+)
+for filename in files:
+    target = root / filename
+    if target.is_file():
+        print(f"Already present: {target}")
+        continue
+    target.parent.mkdir(parents=True, exist_ok=True)
+    hf_hub_download(
+        repo_id=repo_id,
+        filename=filename,
+        local_dir=str(root),
+        token=os.environ.get("HF_TOKEN") or None,
+    )
+PY
 
-hf download "${MODEL_REPO}" \
-  --include "diffusion_models/krea2_turbo_fp8_scaled.safetensors" \
-  --include "text_encoders/qwen3vl_4b_fp8_scaled.safetensors" \
-  --include "vae/qwen_image_vae.safetensors" \
-  --local-dir "${MODEL_DIR}"
-
-echo "Krea 2 Turbo FP8 and ComfyUI-Manager are ready. Switch to GPU A10 and start Preview."
+echo "Krea 2 Turbo FP8 is ready."
