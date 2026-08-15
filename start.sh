@@ -9,6 +9,8 @@ MANAGER_DIR="${CUSTOM_NODES_DIR}/comfyui-manager"
 OUTPUT_DIR="${DATA_DIR}/output"
 PORT="${PORT:-8188}"
 MODEL_REPO="${KREA_MODEL_REPO:-Comfy-Org/Krea-2}"
+MODEL_PATHS_TEMPLATE="${MODEL_PATHS_TEMPLATE:-${COMFYUI_DIR}/extra_model_paths.yaml}"
+MODEL_PATHS_CONFIG="${DATA_DIR}/extra_model_paths.yaml"
 
 mkdir -p "${MODEL_DIR}/diffusion_models" "${MODEL_DIR}/text_encoders" "${MODEL_DIR}/vae" "${MODEL_DIR}/loras" "${CUSTOM_NODES_DIR}" "${OUTPUT_DIR}" "${DATA_DIR}/user"
 
@@ -20,6 +22,8 @@ fi
 if [[ -f "${MANAGER_DIR}/requirements.txt" ]]; then
   python3 -m pip install -r "${MANAGER_DIR}/requirements.txt"
 fi
+
+sed "s|/data|${DATA_DIR}|g" "${MODEL_PATHS_TEMPLATE}" > "${MODEL_PATHS_CONFIG}"
 
 required_files=(
   "diffusion_models/krea2_turbo_fp8_scaled.safetensors"
@@ -47,4 +51,4 @@ exec python3 main.py \
   --port "${PORT}" \
   --user-directory "${DATA_DIR}/user" \
   --output-directory "${OUTPUT_DIR}" \
-  --extra-model-paths-config extra_model_paths.yaml
+  --extra-model-paths-config "${MODEL_PATHS_CONFIG}"
