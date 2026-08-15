@@ -1,14 +1,25 @@
-# Never commit credentials or generated model data
+# Secrets
 .env
 .env.*
 !.env.example
-data/
-models/
-output/
-input/
-custom_nodes/
+
+# One-time CloudStudio runtime state
 .runtime/
-.data/
+
+# Large model weights must stay in the CloudStudio workspace, never GitHub
+ComfyUI/models/**/*.safetensors
+ComfyUI/models/**/*.gguf
+ComfyUI/models/**/*.pt
+ComfyUI/models/**/*.pth
+ComfyUI/models/**/*.bin
+
+# Generated and user data
+ComfyUI/output/**
+ComfyUI/input/**
+ComfyUI/temp/**
+ComfyUI/user/**
+logs/
+*.log
 
 # Local tooling
 __pycache__/
