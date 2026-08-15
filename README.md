@@ -1,35 +1,60 @@
-# ComfyUI + Krea 2 Turbo FP8 on CloudStudio
+# ComfyUI + Krea 2 Turbo FP8（CloudStudio A10）
 
-This repository is optimised for **CloudStudio's preinstalled ComfyUI GPU template**. It deliberately keeps package installation and model downloads out of the GPU startup path.
+这是一个可直接从 GitHub 导入 CloudStudio 的完整应用仓库。仓库内已经包含：
 
-## Cost-efficient workflow
+- 完整 ComfyUI 源码
+- Krea 2 官方源码
+- ComfyUI-Manager
+- CloudStudio Preview 配置
+- Krea 2 Turbo FP8 自动初始化与启动脚本
 
-1. Create/open the CloudStudio ComfyUI template, which provides `/workspace/ComfyUI`.
-2. Use a low-cost CPU specification with the same persistent workspace/disk, then run once:
+## CloudStudio 规格
 
-   ```bash
-   bash comfyuiTool/setup-krea2.sh
-   ```
+创建新应用时选择：
 
-   This downloads Krea 2 Turbo FP8 and installs ComfyUI-Manager. It does **not** require a GPU.
-3. Switch the same workspace to **GPU A10**.
-4. Open Preview. It starts ComfyUI immediately on port 8188 and performs no package or model download.
+- **GPU A10**
+- 24 GB 显存
+- 116 GB 内存
+- Preview 端口：8188
 
-Do not use GPU T4 for normal Krea 2 operation; 16 GB VRAM is too constrained. A10's 24 GB VRAM is the preferred baseline.
+本项目不使用 T4，也没有添加 `--lowvram`。
 
-## Persistent locations
+## 启动
 
-- Models and LoRAs: `.data/models`
-- Output images: `.data/output`
-- Manager: `/workspace/ComfyUI/custom_nodes/comfyui-manager`
+从本仓库创建应用后，点击“运行”。CloudStudio 会读取 `.vscode/preview.yml` 并执行：
 
-## LoRAs
+```bash
+bash comfyuiTool/comfyuiTool.sh
+```
 
-After the one-time setup, open **Manager → Install Models** in ComfyUI. LoRAs are downloaded into the persistent model path. Restart ComfyUI when Manager asks.
+首次启动会：
 
-## Turbo settings
+1. 安装/校验 ComfyUI 依赖；
+2. 下载 Krea 2 Turbo FP8、Qwen3-VL 文本编码器和 VAE；
+3. 启动 ComfyUI。
 
-- Steps: **8**
-- CFG: **0**
-- Timestep shift / `mu`: **1.15**
-- Start at 1024×1024
+之后启动会复用现有依赖和模型，不重复下载。
+
+## 模型位置
+
+```text
+ComfyUI/models/diffusion_models/krea2_turbo_fp8_scaled.safetensors
+ComfyUI/models/text_encoders/qwen3vl_4b_fp8_scaled.safetensors
+ComfyUI/models/vae/qwen_image_vae.safetensors
+ComfyUI/models/loras/
+```
+
+模型权重被 `.gitignore` 排除，只保存在 CloudStudio 应用工作区，不会提交到 GitHub。
+
+## LoRA
+
+进入 ComfyUI 后使用 **Manager → Install Models** 安装 LoRA，或把 `.safetensors` 放入 `ComfyUI/models/loras/`，然后刷新模型列表。
+
+## Krea 2 Turbo 参数
+
+- Steps：8
+- CFG：0
+- Timestep shift / mu：1.15
+- 建议起始分辨率：1024×1024
+
+如 Hugging Face 要求身份验证，在 CloudStudio 环境变量中配置 `HF_TOKEN`，不要写入仓库。
