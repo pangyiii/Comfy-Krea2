@@ -7,6 +7,8 @@ MODEL_DIR="${COMFYUI_DIR}/models"
 RUNTIME_DIR="${PROJECT_DIR}/.runtime"
 PORT="${PORT:-8188}"
 
+source "${PROJECT_DIR}/comfyuiTool/require-a10.sh"
+
 required_files=(
   "${MODEL_DIR}/diffusion_models/krea2_turbo_fp8_scaled.safetensors"
   "${MODEL_DIR}/text_encoders/qwen3vl_4b_fp8_scaled.safetensors"

@@ -11,6 +11,7 @@ export KREA_MODEL_DIR="${KREA_MODEL_DIR:-${MODEL_DIR}}"
 LOG_DIR="${PROJECT_DIR}/logs"
 
 [[ -f "${COMFYUI_DIR}/main.py" ]] || { echo "ComfyUI/main.py is missing from the repository."; exit 1; }
+source "${PROJECT_DIR}/comfyuiTool/require-a10.sh"
 mkdir -p "${RUNTIME_DIR}" "${LOG_DIR}" "${MODEL_DIR}/diffusion_models" "${MODEL_DIR}/text_encoders" "${MODEL_DIR}/vae" "${MODEL_DIR}/loras" "${COMFYUI_DIR}/output"
 exec > >(tee -a "${LOG_DIR}/setup-krea2.log") 2>&1
 

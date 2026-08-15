@@ -3,6 +3,7 @@ apps:
     run: bash comfyuiTool/comfyuiTool.sh
     root: .
     name: ComfyUI Krea 2 Turbo FP8
+    description: Requires CloudStudio GPU A10 with 24GB VRAM
     autoOpen: true
     autoPreview: true
     mainPort: true
