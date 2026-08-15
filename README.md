@@ -1,6 +1,6 @@
 # ComfyUI + Krea 2 Turbo FP8 on CloudStudio
 
-A Docker deployment for ComfyUI with **Krea 2 Turbo FP8**. It downloads the models on first launch to the persistent disk; model weights and credentials are never committed to this repository.
+A Docker deployment for ComfyUI with **Krea 2 Turbo FP8** and **ComfyUI-Manager**. It downloads the models on first launch to the persistent disk; model weights and credentials are never committed to this repository.
 
 ## CloudStudio configuration
 
@@ -22,6 +22,14 @@ Do not use GPU T4 for normal Krea 2 operation: 16 GB VRAM is too constrained. GP
 4. Expose container port `8188`.
 5. If Hugging Face asks for authentication, add `HF_TOKEN` in CloudStudio's secret settings. Do not store it in GitHub.
 6. Deploy. The first boot downloads the model into `/data/models`; subsequent boots reuse it.
+
+## Install LoRAs in the web UI
+
+ComfyUI-Manager is installed automatically on first start and is stored in `/data/custom_nodes/comfyui-manager`. Open ComfyUI, then choose **Manager** → **Install Models** and select a LoRA. Downloaded LoRAs use the persistent `/data/models/loras` directory.
+
+After an installation, restart the ComfyUI application from CloudStudio when prompted. Then add a **Load LoRA** node in your workflow and select the new model.
+
+Only install models and custom nodes from sources you trust. A custom node can execute code inside your CloudStudio container.
 
 ## Installed models
 
