@@ -4,3 +4,6 @@ krea2:
   text_encoders: models/text_encoders
   vae: models/vae
   loras: models/loras
+  custom_nodes: custom_nodes
+  download_model_base: models
+  is_default: true
