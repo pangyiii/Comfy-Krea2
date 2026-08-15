@@ -13,6 +13,10 @@ permissions:
 jobs:
   vendor:
     runs-on: ubuntu-latest
+    env:
+      COMFYUI_REF: 0f1fa67ad8a68b62c65ebc97a7bf485df2459c3a
+      KREA2_REF: db3984fbc6e13b34c0064990fc2d95ac64d00058
+      MANAGER_REF: 4f56cf3dfa7de5d8a8614dfe202ff8d613ba2244
     steps:
       - name: Check out application repository
         uses: actions/checkout@v4
@@ -24,9 +28,20 @@ jobs:
         run: |
           set -Eeuo pipefail
           work_dir="$(mktemp -d)"
-          git clone --depth 1 https://github.com/Comfy-Org/ComfyUI.git "$work_dir/ComfyUI"
-          git clone --depth 1 https://github.com/krea-ai/krea-2.git "$work_dir/krea-2"
-          git clone --depth 1 https://github.com/Comfy-Org/ComfyUI-Manager.git "$work_dir/ComfyUI-Manager"
+          git init "$work_dir/ComfyUI"
+          git -C "$work_dir/ComfyUI" remote add origin https://github.com/Comfy-Org/ComfyUI.git
+          git -C "$work_dir/ComfyUI" fetch --depth 1 origin "$COMFYUI_REF"
+          git -C "$work_dir/ComfyUI" checkout --detach FETCH_HEAD
+
+          git init "$work_dir/krea-2"
+          git -C "$work_dir/krea-2" remote add origin https://github.com/krea-ai/krea-2.git
+          git -C "$work_dir/krea-2" fetch --depth 1 origin "$KREA2_REF"
+          git -C "$work_dir/krea-2" checkout --detach FETCH_HEAD
+
+          git init "$work_dir/ComfyUI-Manager"
+          git -C "$work_dir/ComfyUI-Manager" remote add origin https://github.com/Comfy-Org/ComfyUI-Manager.git
+          git -C "$work_dir/ComfyUI-Manager" fetch --depth 1 origin "$MANAGER_REF"
+          git -C "$work_dir/ComfyUI-Manager" checkout --detach FETCH_HEAD
 
           comfy_sha="$(git -C "$work_dir/ComfyUI" rev-parse HEAD)"
           krea_sha="$(git -C "$work_dir/krea-2" rev-parse HEAD)"
@@ -37,6 +52,15 @@ jobs:
           rsync -a --delete --exclude=.git/ "$work_dir/krea-2/" krea-2/
           mkdir -p ComfyUI/custom_nodes/comfyui-manager
           rsync -a --delete --exclude=.git/ "$work_dir/ComfyUI-Manager/" ComfyUI/custom_nodes/comfyui-manager/
+
+          missing_source=0
+          while IFS= read -r path; do
+            if [[ ! -f "ComfyUI/$path" ]]; then
+              echo "::error::Vendored ComfyUI source is missing: $path"
+              missing_source=1
+            fi
+          done < <(git -C "$work_dir/ComfyUI" ls-tree -r --name-only HEAD)
+          (( missing_source == 0 ))
 
           {
             echo "# Vendored upstream revisions"
@@ -52,8 +76,17 @@ jobs:
           set -Eeuo pipefail
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add ComfyUI krea-2 UPSTREAM_VERSIONS.md
-          git add -f ComfyUI/custom_nodes/comfyui-manager
+          git add -f ComfyUI
+          git add krea-2 UPSTREAM_VERSIONS.md
+
+          missing_staged=0
+          while IFS= read -r path; do
+            if ! git ls-files --error-unmatch "ComfyUI/$path" >/dev/null 2>&1; then
+              echo "::error::ComfyUI source was not staged: $path"
+              missing_staged=1
+            fi
+          done < <(git -C "$work_dir/ComfyUI" ls-tree -r --name-only HEAD)
+          (( missing_staged == 0 ))
           if git diff --cached --quiet; then
             echo "Vendored sources are already current."
             exit 0
